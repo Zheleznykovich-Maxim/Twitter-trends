@@ -4,10 +4,13 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.stream.IntStream;
 
 public class Main {
     public static void main(String[] args) {
@@ -35,13 +38,16 @@ public class Main {
                 tweet[0] = tweet[0].replaceAll("[,\\[\\]]", "");
                 double[] latitude = Arrays.stream(tweet[0].split(" "))
                         .mapToDouble(Double::parseDouble).toArray();
-                Date date = new Date(Arrays.toString(tweet[2].split("-")) + Arrays.toString(tweet[3].split(":")));
+                DateFormat date1 = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                Date date = date1.parse(tweet[2]);
                 tweets.add(new Tweet(latitude, date, tweet[3]));
                 line = reader.readLine();
             }
             reader.close();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
         return tweets;
     }
