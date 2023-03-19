@@ -1,29 +1,32 @@
 package main;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.stream.IntStream;
+import java.util.*;
 
 public class Main {
-    public static void main(String[] args) {
-        ArrayList<Tweet> tweets = ReadFile("./src/resources/cali_tweets2014.txt");
+    public static void main(String[] args) throws IOException {
+        ArrayList<Tweet> tweets = ReadTweets("./src/resources/cali_tweets2014.txt");
 //        Date d = new Date();
 //        SimpleDateFormat format1 = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 //        System.out.println(format1.format(d));
-        for (Tweet tweet : tweets){
-            System.out.println(tweet.toString());
+//        for (Tweet tweet : tweets){
+//            System.out.println(tweet.toString());
+//        }
+        HashMap<String, Double> emotions = ReadCSV("./src/resources/sentiments.csv");
+        for (Tweet tweet : tweets) {
+            tweet.CalcEmotion(emotions);
+            System.out.println(tweet.getEmotion());
         }
 
+
+//        List<String> mapKeys = new ArrayList<>(emotions.keySet());
+//        Collections.sort(mapKeys);
+//        System.out.println(mapKeys);
     }
-    public static ArrayList<Tweet> ReadFile(String name) {
+    public static ArrayList<Tweet> ReadTweets(String name) {
         BufferedReader reader;
         ArrayList<Tweet> tweets = new ArrayList<>();
         try {
@@ -33,7 +36,7 @@ public class Main {
             while (line != null) {
 
 //                System.out.println(line);
-                // read next line
+                // read next line.
                 String[] tweet = line.split("\t");
                 tweet[0] = tweet[0].replaceAll("[,\\[\\]]", "");
                 double[] latitude = Arrays.stream(tweet[0].split(" "))
@@ -50,5 +53,24 @@ public class Main {
             throw new RuntimeException(e);
         }
         return tweets;
+    }
+    public static HashMap<String, Double> ReadCSV(String name) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(name));
+        HashMap<String, Double> map = new HashMap<>();
+
+        String line;
+        Scanner scanner;
+
+        while ((line = reader.readLine()) != null) {
+            scanner = new Scanner(line);
+            scanner.useDelimiter(",");
+            String word = scanner.next();
+            Double emotion = Double.parseDouble(scanner.next());
+            map.put(word, emotion);
+        }
+        //закрываем наш ридер
+        reader.close();
+
+        return map;
     }
 }
