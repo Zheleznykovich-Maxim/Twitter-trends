@@ -1,13 +1,25 @@
 package main;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+
 import java.io.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import javax.swing.*;
+import java.io.IOException;
+import java.util.Map;
+
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, org.json.simple.parser.ParseException {
         ArrayList<Tweet> tweets = ReadTweets("./src/resources/cali_tweets2014.txt");
 //        Date d = new Date();
 //        SimpleDateFormat format1 = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
@@ -16,15 +28,43 @@ public class Main {
 //            System.out.println(tweet.toString());
 //        }
         HashMap<String, Double> emotions = ReadCSV("./src/resources/sentiments.csv");
-        for (Tweet tweet : tweets) {
-            tweet.CalcEmotion(emotions);
-            System.out.println(tweet.getEmotion());
-        }
+//        for (Tweet tweet : tweets) {
+//            tweet.CalcEmotion(emotions);
+//            System.out.println(tweet.getEmotion());
+//        }
+        HashMap<String, ArrayList> states = ReadJSON("./src/resources/states.json");
+        JFrame f = new JFrame("Полигон"); // создали фрейм
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        for (String state : states.keySet()) {
+//            System.out.println("STATE= " + state);
+//            test = new PrintTest((ArrayList) states.get(state).get(0));
+//            f.add(test); // добавили наш
+//
+//        }
+        PrintTest test1 = new PrintTest(states);
+        f.setSize(1280,720);
+        f.add(test1);
+        f.pack(); // собрали
+        f.setVisible(true);
+//        PrintTest test = new PrintTest((ArrayList) states.get("NY").get(0));
 
-
-//        List<String> mapKeys = new ArrayList<>(emotions.keySet());
+//
+//        List<Double> mapKeys = new ArrayList<>(emotions.values());
 //        Collections.sort(mapKeys);
 //        System.out.println(mapKeys);
+        // file name is File.json
+
+
+//        System.out.println(j.toString());
+//        String Name = j.get("WA").toString();
+//        System.out.println("Name :" + Name);
+//
+//        String userJson = "[{'WA': 'Alex','id': 1}, "
+//                + "{'LA': 'Brian','od':2}, "
+//                + "{'NY': 'Charles','id': 3}]";
+//        Gson gson = new Gson();
+//
+//        State[] userArray = gson.fromJson(userJson, State[].class);
     }
     public static ArrayList<Tweet> ReadTweets(String name) {
         BufferedReader reader;
@@ -43,6 +83,9 @@ public class Main {
                         .mapToDouble(Double::parseDouble).toArray();
                 DateFormat date1 = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
                 Date date = date1.parse(tweet[2]);
+//                System.out.println("BEFORE: " + tweet[3]);
+                tweet[3] = tweet[3].replaceAll("[^\\da-zA-Za ]", "");
+//                System.out.println("AFTER: " + tweet[3]);
                 tweets.add(new Tweet(latitude, date, tweet[3]));
                 line = reader.readLine();
             }
@@ -72,5 +115,28 @@ public class Main {
         reader.close();
 
         return map;
+    }
+    public static HashMap<String, ArrayList> ReadJSON(String name) throws IOException, org.json.simple.parser.ParseException {
+
+//JACKSON
+        Object o = new JSONParser().parse(new FileReader(name));
+        JSONObject j = (JSONObject) o;
+        ObjectMapper mapper = new ObjectMapper();
+        String json = j.toString();
+
+        try {
+            // convert JSON string to Map
+            Map<String, ArrayList> map = mapper.readValue(json, Map.class);
+
+            // it works
+            //Map<String, String> map = mapper.readValue(json, new TypeReference<Map<String, String>>() {});
+
+            System.out.println(map);
+            return (HashMap<String, ArrayList>) map;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
