@@ -9,14 +9,14 @@ import static java.awt.Font.BOLD;
 
 public class PrintTest extends JPanel {
     public HashMap<String, ArrayList> coords;
-    public HashMap<String, Point> points;
+    public HashMap<String, Point> points = new HashMap<>();
+    public ArrayList<Polygon> polygons = new ArrayList<>();
 
     public PrintTest(HashMap<String, ArrayList> states){
         coords = states;
 
     }
     public ArrayList<Polygon> GetPolygons() {
-        ArrayList<Polygon> polygons = new ArrayList<>();
         for (String key : coords.keySet()) {
             Polygon polygon;
             ArrayList<ArrayList<ArrayList<Double>>> state = coords.get(key);
@@ -31,6 +31,9 @@ public class PrintTest extends JPanel {
                     }
                     polygon = new Polygon(ints, fillPolygon, ints.length);
                     polygons.add(polygon);
+                    if (i == state4.size() / 2 - 1){
+                        points.put(key, getCenter(polygon));
+                    }
                 }
             }
             else {
@@ -42,18 +45,21 @@ public class PrintTest extends JPanel {
                 }
                 polygon = new Polygon(ints, fillPolygon, ints.length);
                 polygons.add(polygon);
+                points.put(key, getCenter(polygon));
             }
         }
+        System.out.print(points.toString());
         return polygons;
     }
     public void paint(Graphics g) {
         super.paintComponent(g);
         int count = 0;
+        ArrayList<Polygon> polygons = new ArrayList<>();
+        System.out.println(coords.keySet());
         for (String key : coords.keySet()) {
-            System.out.println("ШТАТ = " + key);
+//            System.out.println("ШТАТ = " + key);
             ArrayList<ArrayList<ArrayList<Double>>> state = coords.get(key);
             if (state.get(0).get(0).size() != 2) {
-                System.out.println("ЧЕТЫРЁХМЕРНЫЙ МАССИВ");
                 ArrayList<ArrayList<ArrayList<ArrayList<Double>>>> state4 = coords.get(key);
                 for (int i = 0; i < state4.size(); i++) {
                     int[] fillPolygon = new int[state4.get(i).get(0).size()];
@@ -64,6 +70,7 @@ public class PrintTest extends JPanel {
                     }
 
                     Polygon test = new Polygon(ints, fillPolygon, ints.length);
+                    polygons.add(test);
                     Graphics2D g2d = (Graphics2D) g;
                     g2d.setPaint(Color.green);
                     g2d.fill(test);
@@ -77,13 +84,13 @@ public class PrintTest extends JPanel {
                     }
                     g2d.setPaint(Color.gray);
                     g.drawPolygon(ints, fillPolygon, ints.length);
+                    System.out.println(test.npoints);
                 }
 
             }
             else {
                 int[] fillPolygon = new int[state.get(0).size()];
                 int[] ints = new int[state.get(0).size()];
-                System.out.println(state.toString());
                 for (int i = 0; i < state.get(0).size(); i++) {
 //                    System.out.println(state.get(0).get(i));
 //                    System.out.println(state.get(0).get(0).size());
@@ -91,7 +98,7 @@ public class PrintTest extends JPanel {
                     ints[i] = (int) ((state.get(0).get(i).get(0) + 180.0) * 10.8);
                 }
                 Polygon test = new Polygon(ints, fillPolygon, ints.length);
-
+                polygons.add(test);
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.setPaint(Color.green);
                 g2d.fill(test);
@@ -105,8 +112,6 @@ public class PrintTest extends JPanel {
 
 
             }
-            count++;
-            System.out.println("НАРИСОВАННО " + count);
         }
         Graphics2D g2d = (Graphics2D) g;
         g2d.setPaint(Color.black);
@@ -129,8 +134,8 @@ public class PrintTest extends JPanel {
         min_x = xpoints[0];
         max_y = ypoints[ypoints.length - 1];
         min_y = ypoints[0];
-        System.out.println(String.format("XMAX = %d\nXMIN = %d\nYMAX = %d\nYMIN = %d", max_x, min_x, max_y, min_y));
-        return new Point((int) ((max_x + min_x) / 2.0), (int) ((max_y + min_y) / 2.0));
+        Point result = new Point((int) ((max_x + min_x) / 2.0), (int) ((max_y + min_y) / 2.0));
+        return result;
     }
 
 
