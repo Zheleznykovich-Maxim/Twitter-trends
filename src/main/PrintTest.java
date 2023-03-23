@@ -77,7 +77,7 @@ public class PrintTest extends JPanel {
                     g2d.setPaint(Color.black);
                     g2d.setFont(new Font("Serif", 1, 12));
                     g2d.setStroke(new BasicStroke(2));
-                    if (i == state4.size() / 2 - 1){
+                    if (i == state4.size() / 2 - 2){
                         Point test2 = new Point(getCenter(test));
                         points.put(key, test2);
 
@@ -127,7 +127,9 @@ public class PrintTest extends JPanel {
         int min_x;
         int min_y;
         int[] xpoints = p.xpoints;
+        int sum_x = Arrays.stream(xpoints).sum();
         int[] ypoints = p.ypoints;
+        int sum_y = Arrays.stream(ypoints).sum();
         Arrays.sort(xpoints);
         Arrays.sort(ypoints);
         max_x = xpoints[xpoints.length - 1];
