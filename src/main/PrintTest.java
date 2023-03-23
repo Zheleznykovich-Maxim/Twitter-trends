@@ -10,9 +10,41 @@ import static java.awt.Font.BOLD;
 public class PrintTest extends JPanel {
     public HashMap<String, ArrayList> coords;
     public HashMap<String, Point> points;
+
     public PrintTest(HashMap<String, ArrayList> states){
         coords = states;
 
+    }
+    public ArrayList<Polygon> GetPolygons() {
+        ArrayList<Polygon> polygons = new ArrayList<>();
+        for (String key : coords.keySet()) {
+            Polygon polygon;
+            ArrayList<ArrayList<ArrayList<Double>>> state = coords.get(key);
+            if (state.get(0).get(0).size() != 2) {
+                ArrayList<ArrayList<ArrayList<ArrayList<Double>>>> state4 = coords.get(key);
+                for (int i = 0; i < state4.size(); i++) {
+                    int[] fillPolygon = new int[state4.get(i).get(0).size()];
+                    int[] ints = new int[fillPolygon.length];
+                    for (int j = 0; j < state4.get(i).get(0).size(); j++) {
+                        fillPolygon[j] = (int) ((-state4.get(i).get(0).get(j).get(1) + 74.9) * 10.8);
+                        ints[j] = (int) ((state4.get(i).get(0).get(j).get(0) + 180.0) * 10.8);
+                    }
+                    polygon = new Polygon(ints, fillPolygon, ints.length);
+                    polygons.add(polygon);
+                }
+            }
+            else {
+                int[] fillPolygon = new int[state.get(0).size()];
+                int[] ints = new int[state.get(0).size()];
+                for (int i = 0; i < state.get(0).size(); i++) {
+                    fillPolygon[i] = (int) ((-state.get(0).get(i).get(1) + 74.9) * 10.8);
+                    ints[i] = (int) ((state.get(0).get(i).get(0) + 180.0) * 10.8);
+                }
+                polygon = new Polygon(ints, fillPolygon, ints.length);
+                polygons.add(polygon);
+            }
+        }
+        return polygons;
     }
     public void paint(Graphics g) {
         super.paintComponent(g);
