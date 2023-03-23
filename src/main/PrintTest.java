@@ -5,6 +5,8 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+import static java.awt.Font.BOLD;
+
 public class PrintTest extends JPanel {
     public HashMap<String, ArrayList> coords;
     public PrintTest(HashMap<String, ArrayList> states){
@@ -15,7 +17,7 @@ public class PrintTest extends JPanel {
         super.paintComponent(g);
         int count = 0;
         for (String key : coords.keySet()) {
-
+            System.out.println("ШТАТ = " + key);
             ArrayList<ArrayList<ArrayList<Double>>> state = coords.get(key);
             if (state.get(0).get(0).size() != 2) {
                 System.out.println("ЧЕТЫРЁХМЕРНЫЙ МАССИВ");
@@ -26,13 +28,21 @@ public class PrintTest extends JPanel {
                     for (int j = 0; j < state4.get(i).get(0).size(); j++){
                         fillPolygon[j] = (int) ((-state4.get(i).get(0).get(j).get(1) + 74.9) * 10.8);
                         ints[j] = (int) ((state4.get(i).get(0).get(j).get(0) + 180.0) * 10.8);
-
                     }
+
                     Polygon test = new Polygon(ints, fillPolygon, ints.length);
                     Graphics2D g2d = (Graphics2D) g;
-                    g2d.setPaint(Color.black);
+                    g2d.setPaint(Color.green);
                     g2d.fill(test);
-                    g.drawPolygon(test);
+                    g2d.setPaint(Color.black);
+                    g2d.setFont(new Font("Serif", 1, 15));
+                    g2d.setStroke(new BasicStroke(2));
+                    if (i == state4.size() / 2 - 2) {
+                        Point test2 = new Point(getCenter(test));
+                        g2d.drawString(key, test2.x, test2.y);
+                    }
+                    g2d.setPaint(Color.gray);
+                    g.drawPolygon(ints, fillPolygon, ints.length);
                 }
 
             }
@@ -41,33 +51,47 @@ public class PrintTest extends JPanel {
                 int[] ints = new int[state.get(0).size()];
                 System.out.println(state.toString());
                 for (int i = 0; i < state.get(0).size(); i++) {
-                    System.out.println(state.get(0).get(i));
-                    System.out.println(state.get(0).get(0).size());
-                    System.out.println("ШТАТ = " + key);
-                    fillPolygon[i] = (int) ((-state.get(0).get(i).get(1).doubleValue() + 74.9) * 10.8);
+//                    System.out.println(state.get(0).get(i));
+//                    System.out.println(state.get(0).get(0).size());
+                    fillPolygon[i] = (int) ((-state.get(0).get(i).get(1) + 74.9) * 10.8);
                     ints[i] = (int) ((state.get(0).get(i).get(0) + 180.0) * 10.8);
                 }
+                Polygon test = new Polygon(ints, fillPolygon, ints.length);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setPaint(Color.green);
+                g2d.fill(test);
+                Point test2 = new Point(getCenter(test));
+                g2d.setPaint(Color.gray);
                 g.drawPolygon(ints, fillPolygon, ints.length);
+                g2d.setPaint(Color.black);
+                g.drawString(key, test2.x, test2.y);
+//                g.fillOval(test2.x, test2.y, 10, 10);
+//                g.drawOval(test2.x, test2.y, 10, 10);
+
+
             }
             count++;
             System.out.println("НАРИСОВАННО " + count);
 
         }
-//        int count = 0;
-//        for (ArrayList<ArrayList<ArrayList<Double>>> coord : coords) {
-//            count++;
 //
-//            System.out.println(coord.toString());
-//            for (int i = 0; i < coord.get(0).size(); i++) {
-//                System.out.println(coord.get(0).get(i).get(0).toString());
-//                fillPolygon[i] =  (int) ((-coord.get(0).get(i).get(1) + 74.9) * 10.8);
-//                ints[i] = (int) ((coord.get(0).get(i).get(0) + 180.0) * 10.8);
-//                System.out.println(ints[i] + " " + fillPolygon[i]);
-//
-//            }
-//            g.drawPolygon(ints, fillPolygon, ints.length); // последний параметр неверно был задан
-//            return;
-//        }
-
     }
+    public Point getCenter(Polygon p) {
+        int max_x;
+        int max_y;
+        int min_x;
+        int min_y;
+        int[] xpoints = p.xpoints;
+        int[] ypoints = p.ypoints;
+        Arrays.sort(xpoints);
+        Arrays.sort(ypoints);
+        max_x = xpoints[xpoints.length - 1];
+        min_x = xpoints[0];
+        max_y = ypoints[ypoints.length - 1];
+        min_y = ypoints[0];
+        System.out.println(String.format("XMAX = %d\nXMIN = %d\nYMAX = %d\nYMIN = %d", max_x, min_x, max_y, min_y));
+        return new Point((int) ((max_x + min_x) / 2.0), (int) ((max_y + min_y) / 2.0));
+    }
+
+
 }
