@@ -42,12 +42,10 @@ public class Main {
 //
 //        }
         PrintTest test1 = new PrintTest(states);
-
         f.setSize(1280,720);
         f.add(test1);
         f.pack(); // собрали
         f.setVisible(true);
-        test1.GetPolygons();
 //        PrintTest test = new PrintTest((ArrayList) states.get("NY").get(0));
 
 //
