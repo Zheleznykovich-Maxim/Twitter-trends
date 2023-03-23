@@ -9,6 +9,7 @@ import static java.awt.Font.BOLD;
 
 public class PrintTest extends JPanel {
     public HashMap<String, ArrayList> coords;
+    public HashMap<String, Point> points;
     public PrintTest(HashMap<String, ArrayList> states){
         coords = states;
 
@@ -35,11 +36,12 @@ public class PrintTest extends JPanel {
                     g2d.setPaint(Color.green);
                     g2d.fill(test);
                     g2d.setPaint(Color.black);
-                    g2d.setFont(new Font("Serif", 1, 15));
+                    g2d.setFont(new Font("Serif", 1, 12));
                     g2d.setStroke(new BasicStroke(2));
-                    if (i == state4.size() / 2 - 2) {
+                    if (i == state4.size() / 2 - 1){
                         Point test2 = new Point(getCenter(test));
-                        g2d.drawString(key, test2.x, test2.y);
+                        points.put(key, test2);
+
                     }
                     g2d.setPaint(Color.gray);
                     g.drawPolygon(ints, fillPolygon, ints.length);
@@ -57,14 +59,15 @@ public class PrintTest extends JPanel {
                     ints[i] = (int) ((state.get(0).get(i).get(0) + 180.0) * 10.8);
                 }
                 Polygon test = new Polygon(ints, fillPolygon, ints.length);
+
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.setPaint(Color.green);
                 g2d.fill(test);
                 Point test2 = new Point(getCenter(test));
+                points.put(key, test2);
                 g2d.setPaint(Color.gray);
                 g.drawPolygon(ints, fillPolygon, ints.length);
-                g2d.setPaint(Color.black);
-                g.drawString(key, test2.x, test2.y);
+                ;
 //                g.fillOval(test2.x, test2.y, 10, 10);
 //                g.drawOval(test2.x, test2.y, 10, 10);
 
@@ -72,7 +75,12 @@ public class PrintTest extends JPanel {
             }
             count++;
             System.out.println("НАРИСОВАННО " + count);
+        }
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setPaint(Color.black);
 
+        for (String key : points.keySet()) {
+            g.drawString(key, points.get(key).x, points.get(key).y);
         }
 //
     }
