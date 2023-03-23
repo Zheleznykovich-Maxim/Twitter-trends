@@ -59,12 +59,16 @@ public class PrintTest extends JPanel {
                 points.put(key, new Point(result[0].intValue(), result[1].intValue()));
             }
         }
+        int count = 0;
         for (String key : points.keySet()) {
             Graphics2D g2d = (Graphics2D) g;
             g2d.setColor(Color.BLACK);
             g2d.setFont(new Font("Sergio", 1, 11));
+            count++;
+            System.out.println(key + " " + points.get(key));
             g.drawString(key, points.get(key).x, points.get(key).y);
         }
+        System.out.println("Названий: " + count);
     }
     public Point getCenter(Polygon p) {
         int max_x;
@@ -85,6 +89,7 @@ public class PrintTest extends JPanel {
         return result;
     }
     public Double[] findCentroid(ArrayList<ArrayList<Double>> state) {
+
         ArrayList<Double> off = state.get(0);
         double twicearea = 0;
         double x = 0;
@@ -93,6 +98,18 @@ public class PrintTest extends JPanel {
         ArrayList<Double> p2;
         double f;
         int nPts = state.size();
+        ArrayList<Double> x_coords = new ArrayList<>();
+        ArrayList<Double> y_coords = new ArrayList<>();
+        for (ArrayList<Double> s : state) {
+            x_coords.add(s.get(0));
+            y_coords.add(s.get(1));
+        }
+        if (Collections.frequency(y_coords, y_coords.get(0)) == y_coords.size()) {
+            System.out.println("ОПАНЬКИ  ");
+            System.out.println(state.get(0).get(1));
+            state.get(0).set(1, state.get(0).get(1) + 0.01);
+            System.out.println(state.get(0).get(1));
+        }
         for (int i = 0, j = nPts - 1; i < nPts; j = i++) {
             p1 = state.get(i);
             p2 = state.get(j);
@@ -115,7 +132,6 @@ public class PrintTest extends JPanel {
             mass = mass + Math.abs(state.get(i)[2]);
         }
         Point result = new Point((int) (((x / mass))), (int) (((y / mass))));
-        System.out.println(result);
         return result;
 
     }
