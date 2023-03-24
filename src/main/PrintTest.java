@@ -7,15 +7,16 @@ import java.util.*;
 public class PrintTest extends JPanel {
     public HashMap<String, ArrayList> coords;
     public HashMap<String, Point> points = new HashMap<>();
-    public ArrayList<Polygon> polygons = new ArrayList<>();
+    public ArrayList<Tweet> tweets;
 
-    public PrintTest(HashMap<String, ArrayList> states){
+
+    public PrintTest(HashMap<String, ArrayList> states, ArrayList<Tweet> tweets){
         coords = states;
+        this.tweets = tweets;
 
     }
     public void paint(Graphics g) {
 //        super.paintComponent(g);
-        ArrayList<Polygon> polygons = new ArrayList<>();
         for (String key : coords.keySet()) {
             ArrayList<ArrayList<ArrayList<Double>>> state = coords.get(key);
             if (state.get(0).get(0).size() != 2) {
@@ -59,16 +60,23 @@ public class PrintTest extends JPanel {
                 points.put(key, new Point(result[0].intValue(), result[1].intValue()));
             }
         }
-        int count = 0;
         for (String key : points.keySet()) {
             Graphics2D g2d = (Graphics2D) g;
             g2d.setColor(Color.BLACK);
-            g2d.setFont(new Font("Sergio", 1, 11));
-            count++;
+            g2d.setFont(new Font("Sergio", Font.BOLD, 11));
             System.out.println(key + " " + points.get(key));
             g.drawString(key, points.get(key).x, points.get(key).y);
         }
-        System.out.println("Названий: " + count);
+        for (Tweet t : tweets) {
+            g.setColor(Color.RED);
+            int[] xy = OffSet(t.getLongitude(), t.getLatitude());
+            System.out.println(Arrays.toString(xy));
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setStroke(new BasicStroke(0));
+            g.fillOval(xy[0], xy[1], 7, 7);
+            g.setColor(Color.gray);
+            g.drawOval(xy[0], xy[1], 7, 7);
+        }
     }
     public Point getCenter(Polygon p) {
         int max_x;
@@ -76,17 +84,16 @@ public class PrintTest extends JPanel {
         int min_x;
         int min_y;
         int[] xpoints = p.xpoints;
-        int sum_x = Arrays.stream(xpoints).sum();
+//        int sum_x = Arrays.stream(xpoints).sum();
         int[] ypoints = p.ypoints;
-        int sum_y = Arrays.stream(ypoints).sum();
+//        int sum_y = Arrays.stream(ypoints).sum();
         Arrays.sort(xpoints);
         Arrays.sort(ypoints);
         max_x = xpoints[xpoints.length - 1];
         min_x = xpoints[0];
         max_y = ypoints[ypoints.length - 1];
         min_y = ypoints[0];
-        Point result = new Point((int) ((max_x + min_x) / 2.0), (int) ((max_y + min_y) / 2.0));
-        return result;
+        return new Point((int) ((max_x + min_x) / 2.0), (int) ((max_y + min_y) / 2.0));
     }
     public Double[] findCentroid(ArrayList<ArrayList<Double>> state) {
 
@@ -105,10 +112,7 @@ public class PrintTest extends JPanel {
             y_coords.add(s.get(1));
         }
         if (Collections.frequency(y_coords, y_coords.get(0)) == y_coords.size()) {
-            System.out.println("ОПАНЬКИ  ");
-            System.out.println(state.get(0).get(1));
             state.get(0).set(1, state.get(0).get(1) + 0.01);
-            System.out.println(state.get(0).get(1));
         }
         for (int i = 0, j = nPts - 1; i < nPts; j = i++) {
             p1 = state.get(i);
@@ -125,15 +129,16 @@ public class PrintTest extends JPanel {
         double x = 0;
         double y = 0;
         double mass = 0;
-        int nPts = state.size();
-        for (int i = 0; i < state.size(); i++) {
-            x = x + state.get(i)[0] * Math.abs(state.get(i)[2]);
-            y = y + state.get(i)[1] * Math.abs(state.get(i)[2]);
-            mass = mass + Math.abs(state.get(i)[2]);
+        for (Double[] doubles : state) {
+            x = x + doubles[0] * Math.abs(doubles[2]);
+            y = y + doubles[1] * Math.abs(doubles[2]);
+            mass = mass + Math.abs(doubles[2]);
         }
         Point result = new Point((int) (((x / mass))), (int) (((y / mass))));
         return result;
 
     }
-
+    public int[] OffSet(double x, double y) {
+        return new int[] { (int) ((x + 180.0) * 10.8), (int) ((-y + 74.9) * 10.8)};
+    }
 }

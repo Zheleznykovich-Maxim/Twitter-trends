@@ -1,7 +1,6 @@
 package main;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -11,7 +10,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -41,7 +39,7 @@ public class Main {
 //            f.add(test); // добавили наш
 //
 //        }
-        PrintTest test1 = new PrintTest(states);
+        PrintTest test1 = new PrintTest(states, tweets);
         f.setSize(1280,720);
         f.add(test1);
         f.pack(); // собрали
@@ -79,14 +77,14 @@ public class Main {
                 // read next line.
                 String[] tweet = line.split("\t");
                 tweet[0] = tweet[0].replaceAll("[,\\[\\]]", "");
-                double[] latitude = Arrays.stream(tweet[0].split(" "))
+                double[] coords = Arrays.stream(tweet[0].split(" "))
                         .mapToDouble(Double::parseDouble).toArray();
                 DateFormat date1 = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
                 Date date = date1.parse(tweet[2]);
 //                System.out.println("BEFORE: " + tweet[3]);
                 tweet[3] = tweet[3].replaceAll("[^\\da-zA-Za ]", "");
 //                System.out.println("AFTER: " + tweet[3]);
-                tweets.add(new Tweet(latitude, date, tweet[3]));
+                tweets.add(new Tweet(coords, date, tweet[3]));
                 line = reader.readLine();
             }
             reader.close();

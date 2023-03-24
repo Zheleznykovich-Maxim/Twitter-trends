@@ -4,18 +4,20 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class Tweet {
-    private double[] latitude;
-
-    private Date date;
+    private final double latitude;
+    private final double longitude;
+    private final Date date;
     private String text;
     private double emotion;
     public double getEmotion() { return emotion; }
-    public double[] getLatitude() { return latitude; }
+    public double getLatitude() { return latitude; }
+    public double getLongitude() { return longitude; }
 
     public Date getDate() { return date; }
     public String getText() { return text; }
-    public Tweet(double[] latitude, Date date, String text) {
-        this.latitude = latitude;
+    public Tweet(double[] coords, Date date, String text) {
+        this.latitude = coords[0];
+        this.longitude = coords[1];
         this.date = date;
         this.text = text;
     }
