@@ -18,51 +18,32 @@ import java.util.Map;
 
 public class Main {
     public static void main(String[] args) throws IOException, org.json.simple.parser.ParseException {
+        //TWEETS
         ArrayList<Tweet> tweets = ReadTweets("./src/resources/cali_tweets2014.txt");
-//        Date d = new Date();
-//        SimpleDateFormat format1 = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
-//        System.out.println(format1.format(d));
-//        for (Tweet tweet : tweets){
-//            System.out.println(tweet.toString());
-//        }
+        //EMOTIONS
         HashMap<String, Double> emotions = ReadCSV("./src/resources/sentiments.csv");
-//        for (Tweet tweet : tweets) {
-//            tweet.CalcEmotion(emotions);
-//            System.out.println(tweet.getEmotion());
-//        }
+        //STATES
         HashMap<String, ArrayList> states = ReadJSON("./src/resources/states.json");
+        //TWEET EMOTIONS
+        ArrayList<Integer> tweets_emotions = new ArrayList<>();
+        for (Tweet tweet : tweets) {
+            tweet.CalcEmotion(emotions);
+            tweets_emotions.add((int) (tweet.getEmotion() * 100));
+        }
+        Collections.sort(tweets_emotions);
+//        tweets_emotions.forEach((t) -> System.out.println(t));
+//        System.out.println("Максимум: " + max_emoiton);
+//        System.out.println("Минимум: " + min_emotion);
+
+        //PAINTING
         JFrame f = new JFrame("Полигон"); // создали фрейм
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        for (String state : states.keySet()) {
-//            System.out.println("STATE= " + state);
-//            test = new PrintTest((ArrayList) states.get(state).get(0));
-//            f.add(test); // добавили наш
-//
-//        }
         PrintTest test1 = new PrintTest(states, tweets);
         f.setSize(1280,720);
         f.add(test1);
         f.pack(); // собрали
         f.setVisible(true);
-//        PrintTest test = new PrintTest((ArrayList) states.get("NY").get(0));
 
-//
-//        List<Double> mapKeys = new ArrayList<>(emotions.values());
-//        Collections.sort(mapKeys);
-//        System.out.println(mapKeys);
-        // file name is File.json
-
-
-//        System.out.println(j.toString());
-//        String Name = j.get("WA").toString();
-//        System.out.println("Name :" + Name);
-//
-//        String userJson = "[{'WA': 'Alex','id': 1}, "
-//                + "{'LA': 'Brian','od':2}, "
-//                + "{'NY': 'Charles','id': 3}]";
-//        Gson gson = new Gson();
-//
-//        State[] userArray = gson.fromJson(userJson, State[].class);
     }
     public static ArrayList<Tweet> ReadTweets(String name) {
         BufferedReader reader;
@@ -72,8 +53,6 @@ public class Main {
             String line = reader.readLine();
 
             while (line != null) {
-
-//                System.out.println(line);
                 // read next line.
                 String[] tweet = line.split("\t");
                 tweet[0] = tweet[0].replaceAll("[,\\[\\]]", "");
@@ -81,9 +60,7 @@ public class Main {
                         .mapToDouble(Double::parseDouble).toArray();
                 DateFormat date1 = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
                 Date date = date1.parse(tweet[2]);
-//                System.out.println("BEFORE: " + tweet[3]);
                 tweet[3] = tweet[3].replaceAll("[^\\da-zA-Za ]", "");
-//                System.out.println("AFTER: " + tweet[3]);
                 tweets.add(new Tweet(coords, date, tweet[3]));
                 line = reader.readLine();
             }
@@ -98,7 +75,6 @@ public class Main {
     public static HashMap<String, Double> ReadCSV(String name) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(name));
         HashMap<String, Double> map = new HashMap<>();
-
         String line;
         Scanner scanner;
 
@@ -108,6 +84,7 @@ public class Main {
             String word = scanner.next();
             Double emotion = Double.parseDouble(scanner.next());
             map.put(word, emotion);
+
         }
         //закрываем наш ридер
         reader.close();
@@ -125,11 +102,7 @@ public class Main {
         try {
             // convert JSON string to Map
             Map<String, ArrayList> map = mapper.readValue(json, Map.class);
-
             // it works
-            //Map<String, String> map = mapper.readValue(json, new TypeReference<Map<String, String>>() {});
-
-            System.out.println(map);
             return (HashMap<String, ArrayList>) map;
 
         } catch (IOException e) {
@@ -137,4 +110,5 @@ public class Main {
         }
         return null;
     }
+
 }

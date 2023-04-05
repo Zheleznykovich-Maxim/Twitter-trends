@@ -8,18 +8,23 @@ public class PrintTest extends JPanel {
     public HashMap<String, ArrayList> coords;
     public HashMap<String, Point> points = new HashMap<>();
     public ArrayList<Tweet> tweets;
-
+    public HashMap<Double[], Color> emotions_colors;
+    public HashMap<String, Polygon> polygons;
+    public HashMap<String, ArrayList<Polygon>> state_polygons4;
 
     public PrintTest(HashMap<String, ArrayList> states, ArrayList<Tweet> tweets){
         coords = states;
         this.tweets = tweets;
+        this.emotions_colors = emotions_colors;
 
     }
-    public void paint(Graphics g) {
-//        super.paintComponent(g);
+    public void GetPolygons(Graphics g) {
+        polygons = new HashMap<>();
+        state_polygons4 = new HashMap<>();
         for (String key : coords.keySet()) {
             ArrayList<ArrayList<ArrayList<Double>>> state = coords.get(key);
             if (state.get(0).get(0).size() != 2) {
+                ArrayList<Polygon> polygons4 = new ArrayList<>();
                 ArrayList<Double[]> centroids = new ArrayList<>();
                 ArrayList<ArrayList<ArrayList<ArrayList<Double>>>> state4 = coords.get(key);
                 for (int i = 0; i < state4.size(); i++) {
@@ -30,17 +35,15 @@ public class PrintTest extends JPanel {
                         ints[j] = (int) ((state4.get(i).get(0).get(j).get(0) + 180.0) * 10.8);
                     }
                     Polygon polygon = new Polygon(ints, fillPolygon, ints.length);
+                    polygons.put(key, polygon);
+                    polygons4.add(polygon);
                     Graphics2D g2d = (Graphics2D) g;
                     g2d.setStroke(new BasicStroke(1.2F));
-                    g2d.setColor(Color.GREEN);
-                    g2d.fill(polygon);
                     g2d.setColor(Color.gray);
                     g.drawPolygon(polygon);
-//                    if (i == state4.size() / 2 - 1){
-//                        points.put(key, findCentroid(state4.get(i).get(0)));
-//                    }
                     centroids.add(findCentroid(state4.get(i).get(0)));
                 }
+                state_polygons4.put(key, polygons4);
                 points.put(key, findCentroidByMass(centroids));
             }
             else {
@@ -50,50 +53,60 @@ public class PrintTest extends JPanel {
                     fillPolygon[i] = (int) ((-state.get(0).get(i).get(1) + 74.9) * 10.8);
                     ints[i] = (int) ((state.get(0).get(i).get(0) + 180.0) * 10.8);
                 }
-                Graphics2D g2d = (Graphics2D) g;
                 Polygon polygon = new Polygon(ints, fillPolygon, ints.length);
-                g2d.setColor(Color.GREEN);
-                g2d.fill(polygon);
-                g2d.setColor(Color.gray);
-                g2d.drawPolygon(polygon);
+                polygons.put(key, polygon);
                 Double[] result = findCentroid(state.get(0));
                 points.put(key, new Point(result[0].intValue(), result[1].intValue()));
             }
         }
+    }
+    public void paint(Graphics g) {
+        super.paintComponent(g);
+        GetPolygons(g);
+        //FILL POLYGONS
+        for (String key : polygons.keySet()){
+            double state_emotion = 0;
+            int count_tweets = 0;
+            for (Tweet t : tweets) {
+                t.getState(points);
+                if (key.equals(t.state)) {
+                    count_tweets++;
+                    state_emotion+= t.emotion;
+                }
+            }
+//            state_emotion /= count_tweets;
+            ChooseColor(count_tweets, state_emotion, g);
+            if (state_polygons4.get(key) != null){
+                for (Polygon p : state_polygons4.get(key)) {
+                    g.fillPolygon(p);
+                }
+            }
+            g.fillPolygon(polygons.get(key));
+            g.setColor(Color.gray);
+            g.drawPolygon(polygons.get(key));
+        }
+        //SIGNATURES OF STATES
         for (String key : points.keySet()) {
             Graphics2D g2d = (Graphics2D) g;
             g2d.setColor(Color.BLACK);
             g2d.setFont(new Font("Sergio", Font.BOLD, 11));
-            System.out.println(key + " " + points.get(key));
             g.drawString(key, points.get(key).x, points.get(key).y);
         }
+        //PAINTING TWEETS
         for (Tweet t : tweets) {
-            g.setColor(Color.RED);
+            if (t.emotion == null){
+                ChooseColor(0, 0.0, g);
+            }
+            else {
+                ChooseColor(1, t.emotion, g);
+            }
             int[] xy = OffSet(t.getLongitude(), t.getLatitude());
-            System.out.println(Arrays.toString(xy));
             Graphics2D g2d = (Graphics2D) g;
             g2d.setStroke(new BasicStroke(0));
-            g.fillOval(xy[0], xy[1], 7, 7);
+            g.fillOval(xy[0], xy[1], 6, 6);
             g.setColor(Color.gray);
-            g.drawOval(xy[0], xy[1], 7, 7);
+            g.drawOval(xy[0], xy[1], 6, 6);
         }
-    }
-    public Point getCenter(Polygon p) {
-        int max_x;
-        int max_y;
-        int min_x;
-        int min_y;
-        int[] xpoints = p.xpoints;
-//        int sum_x = Arrays.stream(xpoints).sum();
-        int[] ypoints = p.ypoints;
-//        int sum_y = Arrays.stream(ypoints).sum();
-        Arrays.sort(xpoints);
-        Arrays.sort(ypoints);
-        max_x = xpoints[xpoints.length - 1];
-        min_x = xpoints[0];
-        max_y = ypoints[ypoints.length - 1];
-        min_y = ypoints[0];
-        return new Point((int) ((max_x + min_x) / 2.0), (int) ((max_y + min_y) / 2.0));
     }
     public Double[] findCentroid(ArrayList<ArrayList<Double>> state) {
 
@@ -134,11 +147,38 @@ public class PrintTest extends JPanel {
             y = y + doubles[1] * Math.abs(doubles[2]);
             mass = mass + Math.abs(doubles[2]);
         }
-        Point result = new Point((int) (((x / mass))), (int) (((y / mass))));
-        return result;
+        return new Point((int) (((x / mass))), (int) (((y / mass))));
 
     }
-    public int[] OffSet(double x, double y) {
+    public void ChooseColor(int count_tweets, double state_emotion, Graphics g) {
+        if (count_tweets == 0) {
+            g.setColor(new Color(184,184,184));
+        }
+        else if (state_emotion == 0.0) {
+            g.setColor(new Color(255,255,255));
+        }
+        else {
+            if (state_emotion > 0) {
+                g.setColor(new Color(212, 255 - 100 * (int) state_emotion % 255, 0));
+            }
+            else {
+                g.setColor(new Color(44, 122 + (100  * (int)state_emotion) % 73, 122));
+            }
+//            if (state_emotion > 0) {
+//                g.setColor(new Color((100 * (int) state_emotion % 255), 140, 0));
+//            }
+//            else {
+//                g.setColor(new Color(140, ((138 * (-1) * (int)state_emotion) % 255), 0));
+//            }
+//            if (state_emotion > 0) {
+//                g.setColor(new Color(255, 0, 0, (100 * (int) state_emotion) % 255));
+//            }
+//            else {
+//                g.setColor(new Color(0, 0, 255, (-100 * (int) state_emotion) % 255));
+//            }
+        }
+    }
+    public static int[] OffSet(double x, double y) {
         return new int[] { (int) ((x + 180.0) * 10.8), (int) ((-y + 74.9) * 10.8)};
     }
 }
